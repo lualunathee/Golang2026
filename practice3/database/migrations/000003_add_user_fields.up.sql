@@ -1,4 +1,3 @@
 ALTER TABLE users
-    ADD COLUMN email VARCHAR(255),
-  ADD COLUMN age INT,
+    ADD COLUMN age INT,
   ADD COLUMN city VARCHAR(255);

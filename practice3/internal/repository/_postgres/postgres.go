@@ -40,7 +40,7 @@ func NewPGXDialect(ctx context.Context, cfg *modules.PostgreConfig) *Dialect {
 }
 
 func AutoMigrate(cfg *modules.PostgreConfig) {
-	sourceURL := "file://database/migrations"
+	sourceURL := "file:///app/database/migrations"
 	databaseURL := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.Username, cfg.Password,

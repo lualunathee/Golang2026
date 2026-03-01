@@ -49,20 +49,25 @@ func Run() {
 	}).Methods("GET")
 
 	r.Use(middleware.LoggingMiddleware)
-	r.Use(middleware.AuthMiddleware)
+	//r.Use(middleware.AuthMiddleware)
 
 	log.Println("Server started on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func initPostgreConfig() *modules.PostgreConfig {
+	sslMode := os.Getenv("DB_SSLMODE")
+	if sslMode == "" {
+		sslMode = "disable"
+	}
+
 	return &modules.PostgreConfig{
 		Host:        os.Getenv("DB_HOST"),
 		Port:        os.Getenv("DB_PORT"),
 		Username:    os.Getenv("DB_USER"),
 		Password:    os.Getenv("DB_PASSWORD"),
 		DBName:      os.Getenv("DB_NAME"),
-		SSLMode:     os.Getenv("DB_SSLMODE"),
+		SSLMode:     sslMode,
 		ExecTimeout: 5 * time.Second,
 	}
 }
