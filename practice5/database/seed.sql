@@ -1,0 +1,47 @@
+INSERT INTO users (name, email, gender, birth_date) VALUES
+('John Doe', 'john1@example.com', 'male', '1995-01-10'),
+('Alice Smith', 'alice2@example.com', 'female', '1998-03-12'),
+('Bob Brown', 'bob3@example.com', 'male', '1994-07-19'),
+('Clara White', 'clara4@example.com', 'female', '2000-05-21'),
+('David Green', 'david5@example.com', 'male', '1997-11-03'),
+('Emma Black', 'emma6@example.com', 'female', '1999-08-17'),
+('Frank Stone', 'frank7@example.com', 'male', '1996-04-02'),
+('Grace Hill', 'grace8@example.com', 'female', '2001-09-29'),
+('Henry Wood', 'henry9@example.com', 'male', '1993-12-01'),
+('Ivy King', 'ivy10@example.com', 'female', '1998-06-11'),
+('Jack Lee', 'jack11@example.com', 'male', '1995-10-25'),
+('Kate Hall', 'kate12@example.com', 'female', '2002-02-14'),
+('Leo Scott', 'leo13@example.com', 'male', '1997-03-30'),
+('Mia Adams', 'mia14@example.com', 'female', '1999-07-07'),
+('Nick Baker', 'nick15@example.com', 'male', '1994-09-18'),
+('Olivia Carter', 'olivia16@example.com', 'female', '2000-01-22'),
+('Paul Evans', 'paul17@example.com', 'male', '1996-05-09'),
+('Queen Ford', 'queen18@example.com', 'female', '1998-11-27'),
+('Ryan Gray', 'ryan19@example.com', 'male', '1995-12-13'),
+('Sophia Turner', 'sophia20@example.com', 'female', '2001-04-15');
+
+
+INSERT INTO user_friends (user_id, friend_id) VALUES
+(1, 3), (3, 1),
+(1, 4), (4, 1),
+(1, 5), (5, 1),
+
+(2, 3), (3, 2),
+(2, 4), (4, 2),
+(2, 5), (5, 2),
+
+(1, 6), (6, 1),
+(2, 7), (7, 2),
+(3, 8), (8, 3),
+(4, 9), (9, 4),
+(5, 10), (10, 5),
+(6, 11), (11, 6),
+(7, 12), (12, 7),
+(8, 13), (13, 8),
+(9, 14), (14, 9),
+(10, 15), (15, 10),
+(11, 16), (16, 11),
+(12, 17), (17, 12),
+(13, 18), (18, 13),
+(14, 19), (19, 14),
+(15, 20), (20, 15);
