@@ -27,22 +27,30 @@ func (u *UserUseCase) RegisterUser(user *entity.User) (*entity.User, string, err
 }
 
 func (u *UserUseCase) LoginUser(user *entity.LoginUserDTO) (string, error) {
-	// 1. Ищем юзера в базе
+	
 	userFromRepo, err := u.repo.LoginUser(user)
 	if err != nil {
 		return "", fmt.Errorf("User From Repo: %w", err)
 	}
 
-	// 2. Сравниваем пароль с хэшем из базы
+	
 	if !utils.CheckPassword(userFromRepo.Password, user.Password) {
 		return "", fmt.Errorf("Check Password: wrong password")
 	}
 
-	// 3. Генерируем JWT токен
+	
 	token, err := utils.GenerateJWT(userFromRepo.ID, userFromRepo.Role)
 	if err != nil {
 		return "", fmt.Errorf("Generate JWT: %w", err)
 	}
 
 	return token, nil
+}
+
+func (u *UserUseCase) GetUserByID(id string) (*entity.User, error) {
+    return u.repo.GetUserByID(id)
+}
+
+func (u *UserUseCase) UpdateUserRole(id string, role string) error {
+    return u.repo.UpdateUserRole(id, role)
 }

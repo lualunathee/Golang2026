@@ -5,12 +5,21 @@ import (
 	"os"
 	"strings"
 	"time"
-
+	"sync"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type RateLimiter struct {
+	sync.Mutex
+	requests map[string]int
+}
+
+var limiter = RateLimiter{
+	requests: make(map[string]int),
+}
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
@@ -55,6 +64,46 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		claims, _ := token.Claims.(jwt.MapClaims)
 		c.Set("userID", claims["user_id"].(string))
 		c.Set("role", claims["role"].(string))
+
+		c.Next()
+	}
+}
+
+func RoleMiddleware(requiredRole string) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        role, exists := c.Get("role")
+        if !exists || role.(string) != requiredRole {
+            c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied: admin role required"})
+            return
+        }
+        c.Next()
+    }
+}
+
+func RateLimitMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var identifier string
+
+		
+		userID, exists := c.Get("userID")
+		if exists {
+			identifier = userID.(string)
+		} else {
+			
+			identifier = c.ClientIP()
+		}
+
+		limiter.Lock() 
+		
+		
+		if limiter.requests[identifier] >= 50 {
+			limiter.Unlock()
+			c.AbortWithStatusJSON(429, gin.H{"error": "Too Many Requests. Relax!"})
+			return
+		}
+
+		limiter.requests[identifier]++
+		limiter.Unlock() 
 
 		c.Next()
 	}

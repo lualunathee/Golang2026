@@ -14,13 +14,32 @@ type userRoutes struct {
 }
 
 func NewUserRoutes(handler *gin.RouterGroup, t usecase.UserInterface) {
-	r := &userRoutes{t}
+    r := &userRoutes{t}
+    
 
-	h := handler.Group("/users")
-	{
-		h.POST("/", r.RegisterUser)
-		h.POST("/login", r.LoginUser)
-	}
+	handler.Use(utils.RateLimitMiddleware())
+
+    
+    h := handler.Group("/users")
+    {
+        h.POST("/", r.RegisterUser)
+        h.POST("/login", r.LoginUser)
+    }
+
+    
+    protected := handler.Group("/users")
+    protected.Use(utils.JWTAuthMiddleware()) 
+    {
+        protected.GET("/me", r.GetMe) 
+    }
+
+	adminOnly := handler.Group("/users")
+   
+    adminOnly.Use(utils.JWTAuthMiddleware(), utils.RoleMiddleware("admin")) 
+    {
+        
+        adminOnly.PATCH("/promote/:id", r.PromoteUser) 
+    }
 }
 
 func (r *userRoutes) RegisterUser(c *gin.Context) {
@@ -30,7 +49,7 @@ func (r *userRoutes) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	// Хэшируем пароль перед сохранением
+	
 	hashedPassword, err := utils.HashPassword(createUserDTO.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password"})
@@ -41,7 +60,7 @@ func (r *userRoutes) RegisterUser(c *gin.Context) {
 		Username: createUserDTO.Username,
 		Email:    createUserDTO.Email,
 		Password: hashedPassword,
-		Role:     "user", // Роль по умолчанию
+		Role:     "user",
 	}
 
 	createdUser, sessionID, err := r.t.RegisterUser(&user)
@@ -72,3 +91,35 @@ func (r *userRoutes) LoginUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
+
+func (r *userRoutes) GetMe(c *gin.Context) {
+  
+    userID, exists := c.Get("userID")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: no user id in context"})
+        return
+    }
+
+    
+    user, err := r.t.GetUserByID(userID.(string))
+    if err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+
+    
+    c.JSON(http.StatusOK, gin.H{"email": user.Email})
+}
+
+func (r *userRoutes) PromoteUser(c *gin.Context) {
+    id := c.Param("id") 
+    
+    err := r.t.UpdateUserRole(id, "admin")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "User promoted to admin", "user_id": id})
+}
+
